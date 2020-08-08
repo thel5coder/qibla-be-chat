@@ -1,0 +1,17 @@
+version: '3.6'
+services:
+ qibla-backend-chat:
+  container_name: qibla-backend-chat
+  image: qibla-backend-chat:latest
+  restart: always
+  hostname: qibla-backend-chat
+  ports:
+      - "8910:3000"
+  volumes:
+   - ./static:/go/src/qibla-backend-chat/static
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.191.38.0/24
