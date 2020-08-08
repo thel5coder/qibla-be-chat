@@ -16,6 +16,7 @@ import (
 	"qibla-backend-chat/usecase/viewmodel"
 
 	"github.com/go-redis/redis/v7"
+	odoo "github.com/skilld-labs/go-odoo"
 	"github.com/streadway/amqp"
 )
 
@@ -57,6 +58,7 @@ type ContractUC struct {
 	Wavecell    wavecell.Connection
 	Mandrill    mandrill.Credential
 	ReqID       string
+	Odoo        *odoo.Client
 }
 
 // StoreToRedis save data to redis with key key

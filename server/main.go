@@ -8,6 +8,7 @@ import (
 	"qibla-backend-chat/pkg/jwe"
 	"qibla-backend-chat/pkg/jwt"
 	"qibla-backend-chat/pkg/mandrill"
+	"qibla-backend-chat/pkg/odoo"
 	"qibla-backend-chat/pkg/pg"
 	"qibla-backend-chat/pkg/str"
 	boot "qibla-backend-chat/server/bootstrap"
@@ -133,6 +134,19 @@ func main() {
 		FromName: envConfig["MANDRILL_FROM_NAME"],
 	}
 
+	// ODOO connection
+	odooInfo := odoo.Connection{
+		Host: envConfig["ODOO_URL"],
+		DB:   envConfig["ODOO_DATABASE"],
+		User: envConfig["ODOO_ADMIN"],
+		Pass: envConfig["ODOO_PASSWORD"],
+	}
+	odooDB, err := odooInfo.Connect()
+	if err != nil {
+		panic(err)
+	}
+	defer odooDB.Close()
+
 	// Validator initialize
 	validatorInit()
 
@@ -148,6 +162,7 @@ func main() {
 		Aes:         aesCredential,
 		AesFront:    aesFrontCredential,
 		Mandrill:    mandrillCredential,
+		Odoo:        odooDB,
 	}
 
 	r := chi.NewRouter()

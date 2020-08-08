@@ -53,6 +53,17 @@ func (boot *Bootup) RegisterRoutes() {
 					r.Get("/token", userHandler.GetByTokenHandler)
 				})
 			})
+
+			odooHandler := api.OdooHandler{Handler: handlerType}
+			r.Route("/odoo", func(r chi.Router) {
+				r.Group(func(r chi.Router) {
+					r.Get("/field/{id}", odooHandler.GetFieldHandler)
+					r.Get("/travelPackage", odooHandler.FindAllTravelPackageHandler)
+					r.Get("/travelPackage/{id}", odooHandler.FindByIDTravelPackageHandler)
+					r.Get("/partner/{id}", odooHandler.FindByIDPartnerHandler)
+					r.Get("/guide/{id}", odooHandler.FindByIDGuideHandler)
+				})
+			})
 		})
 
 		// API ADMIN

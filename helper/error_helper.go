@@ -185,4 +185,6 @@ var (
 	InvalidCredentials = "invalid_credentials"
 	// InactiveAdmin ...
 	InactiveAdmin = "inactive_admin"
+	// RecordNotFound ...
+	RecordNotFound = "record_not_found"
 )
