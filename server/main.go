@@ -1,29 +1,32 @@
 package main
 
 import (
+	"context"
 	"qibla-backend-chat/pkg/aes"
 	"qibla-backend-chat/pkg/aesfront"
-	"qibla-backend-chat/pkg/amqp"
 	"qibla-backend-chat/pkg/env"
+	"qibla-backend-chat/pkg/interfacepkg"
 	"qibla-backend-chat/pkg/jwe"
 	"qibla-backend-chat/pkg/jwt"
+	"qibla-backend-chat/pkg/logruslogger"
 	"qibla-backend-chat/pkg/mandrill"
+	"qibla-backend-chat/pkg/mongo"
 	"qibla-backend-chat/pkg/odoo"
 	"qibla-backend-chat/pkg/pg"
+	"qibla-backend-chat/pkg/pusher"
 	"qibla-backend-chat/pkg/str"
 	boot "qibla-backend-chat/server/bootstrap"
 	"qibla-backend-chat/usecase"
+	"time"
 
 	"github.com/rs/cors"
 
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-playground/locales/en"
@@ -63,9 +66,7 @@ func init() {
 }
 
 func main() {
-	loc, _ := time.LoadLocation("Asia/Jakarta")
-	now := time.Now().In(loc)
-	fmt.Println("Location : ", loc, " Time : ", now.Format(time.RFC3339))
+	ctx := "main"
 
 	// Connect to redis
 	redisClient := redis.NewClient(&redis.Options{
@@ -73,8 +74,10 @@ func main() {
 		Password: envConfig["REDIS_PASSWORD"],
 		DB:       0,
 	})
-	pong, err := redisClient.Ping().Result()
-	fmt.Println("Redis ping status: "+pong, err)
+	_, err := redisClient.Ping().Result()
+	if err != nil {
+		panic(err)
+	}
 
 	// Postgre DB connection
 	dbInfo := pg.Connection{
@@ -90,17 +93,6 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
-
-	// Mqueue connection
-	amqpInfo := amqp.Connection{
-		URL: envConfig["AMQP_URL"],
-	}
-	amqpConn, amqpChannel, err := amqpInfo.Connect()
-	if err != nil {
-		panic(err)
-	}
-	usecase.AmqpConnection = amqpConn
-	usecase.AmqpChannel = amqpChannel
 
 	// JWT credential
 	jwtCredential := jwt.Credential{
@@ -147,14 +139,35 @@ func main() {
 	}
 	defer odooDB.Close()
 
+	// Pusher credential
+	pusherCredential := pusher.Credential{
+		AppID:   envConfig["PUSHER_APP_ID"],
+		Key:     envConfig["PUSHER_KEY"],
+		Secret:  envConfig["PUSHER_SECRET"],
+		Cluster: envConfig["PUSHER_CLUSTER"],
+	}
+
+	// MongoDB connection
+	mongoConnection := mongo.Connection{
+		URL:    envConfig["MONGO_URL"],
+		DBName: envConfig["MONGO_DB"],
+	}
+	mongoDB, err := mongoConnection.Connect()
+	if err != nil {
+		panic(err)
+	}
+	ctxMongo, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	defer mongoDB.Disconnect(ctxMongo)
+
 	// Validator initialize
 	validatorInit()
 
 	// Load contract struct
 	contractUC := usecase.ContractUC{
 		DB:          db,
-		AmqpConn:    amqpConn,
-		AmqpChannel: amqpChannel,
+		MongoDB:     mongoDB,
+		MongoDBName: mongoConnection.DBName,
 		Redis:       redisClient,
 		EnvConfig:   envConfig,
 		Jwt:         jwtCredential,
@@ -163,6 +176,7 @@ func main() {
 		AesFront:    aesFrontCredential,
 		Mandrill:    mandrillCredential,
 		Odoo:        odooDB,
+		Pusher:      pusherCredential,
 	}
 
 	r := chi.NewRouter()
@@ -219,6 +233,13 @@ func main() {
 	}
 	filesDir = filepath.Join(workDir, filePath)
 	fileServer(r, envConfig["HTML_FILE_PATH"], http.Dir(filesDir))
+
+	// Log start server
+	startBody := map[string]interface{}{
+		"Host":     host,
+		"Location": str.DefaultData(envConfig["APP_DEFAULT_LOCATION"], "Asia/Jakarta"),
+	}
+	logruslogger.Log(logruslogger.InfoLevel, interfacepkg.Marshall(startBody), ctx, "server_start", "")
 
 	// Run the app
 	http.ListenAndServe(host, r)

@@ -2,6 +2,7 @@ package number
 
 import (
 	"github.com/leekchan/accounting"
+	"qibla-backend-chat/pkg/interfacepkg"
 	"strings"
 )
 
@@ -70,4 +71,21 @@ func FormatCurrency(value float64, currencySymbol, thousandSeparator, decimalSep
 	ac := accounting.Accounting{Symbol: currencySymbol, Precision: precision, Thousand: thousandSeparator, Decimal: decimalSeparator}
 
 	return ac.FormatMoney(value)
+}
+
+// IntArrInArr ...
+func IntArrInArr(slice []int64, sliceData []int64) bool {
+	counter := 0
+	for _, s := range slice {
+		isExist, _ := interfacepkg.InArray(s, sliceData)
+		if isExist {
+			counter++
+		}
+	}
+
+	if counter != len(slice) {
+		return false
+	}
+
+	return true
 }

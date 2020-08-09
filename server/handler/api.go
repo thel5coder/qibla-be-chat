@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"qibla-backend-chat/usecase/viewmodel"
 	"strings"
 
 	"qibla-backend-chat/pkg/jwe"
@@ -89,6 +90,24 @@ func requestIDFromContextInterface(ctx context.Context, key string) map[string]i
 func getHeaderReqID(r *http.Request) (res string) {
 	if len(r.Header["req_id"]) > 0 {
 		res = r.Header["req_id"][0]
+	}
+
+	return res
+}
+
+// getUserDetail ...
+func getUserDetail(r *http.Request) (res viewmodel.UserVM) {
+	user := requestIDFromContextInterface(r.Context(), "user")
+
+	res = viewmodel.UserVM{
+		ID:         user["id"].(string),
+		Username:   user["username"].(string),
+		Email:      user["email"].(string),
+		Name:       user["name"].(string),
+		IsActive:   user["is_active"].(bool),
+		RoleID:     user["role_id"].(string),
+		RoleName:   user["role_name"].(string),
+		OdooUserID: user["odoo_user_id"].(int64),
 	}
 
 	return res

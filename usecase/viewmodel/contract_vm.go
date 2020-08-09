@@ -11,3 +11,9 @@ type RedisStringValueVM struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
+
+// LoginVM ....
+type LoginVM struct {
+	Token       string `json:"token"`
+	ExpiredDate string `json:"expired_date"`
+}

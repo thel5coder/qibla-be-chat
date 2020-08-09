@@ -12,6 +12,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-redis/redis v6.15.8+incompatible // indirect
 	github.com/go-redis/redis/v7 v7.2.0
+	github.com/google/uuid v1.1.1
 	github.com/googollee/go-socket.io v1.4.3 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
@@ -22,6 +23,7 @@ require (
 	github.com/lib/pq v1.7.0
 	github.com/minio/minio-go/v6 v6.0.57 // indirect
 	github.com/pkg/sftp v1.11.0 // indirect
+	github.com/pusher/pusher-http-go v4.0.1+incompatible
 	github.com/rs/cors v1.7.0
 	github.com/rs/xid v1.2.1
 	github.com/sirupsen/logrus v1.5.0
@@ -29,7 +31,7 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/ulule/limiter/v3 v3.5.0
-	go.mongodb.org/mongo-driver v1.3.5 // indirect
+	go.mongodb.org/mongo-driver v1.4.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

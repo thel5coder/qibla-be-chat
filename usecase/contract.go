@@ -3,21 +3,23 @@ package usecase
 import (
 	"encoding/json"
 	"errors"
-	"qibla-backend-chat/pkg/aesfront"
-	"qibla-backend-chat/pkg/logruslogger"
 	"time"
 
 	"database/sql"
 	"qibla-backend-chat/pkg/aes"
+	"qibla-backend-chat/pkg/aesfront"
 	"qibla-backend-chat/pkg/jwe"
 	"qibla-backend-chat/pkg/jwt"
+	"qibla-backend-chat/pkg/logruslogger"
 	"qibla-backend-chat/pkg/mandrill"
+	"qibla-backend-chat/pkg/pusher"
 	"qibla-backend-chat/pkg/wavecell"
 	"qibla-backend-chat/usecase/viewmodel"
 
 	"github.com/go-redis/redis/v7"
 	odoo "github.com/skilld-labs/go-odoo"
 	"github.com/streadway/amqp"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -47,6 +49,8 @@ var AmqpChannel *amqp.Channel
 type ContractUC struct {
 	DB          *sql.DB
 	Tx          *sql.Tx
+	MongoDB     *mongo.Client
+	MongoDBName string
 	AmqpConn    *amqp.Connection
 	AmqpChannel *amqp.Channel
 	Redis       *redis.Client
@@ -59,6 +63,7 @@ type ContractUC struct {
 	Mandrill    mandrill.Credential
 	ReqID       string
 	Odoo        *odoo.Client
+	Pusher      pusher.Credential
 }
 
 // StoreToRedis save data to redis with key key

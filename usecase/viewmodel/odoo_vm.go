@@ -10,6 +10,8 @@ type TravelPackageVM struct {
 	IsActive    bool          `xmlrpc:"is_active,omptempty"`
 	JamaahList  []interface{} `xmlrpc:"jamaah_list,omptempty"`
 	GuideList   []interface{} `xmlrpc:"guide_ids,omptempty"`
+	GuideListID []int64       `xmlrpc:"guide_list_id,omptempty"`
+	UserList    []int64       `xmlrpc:"user_list,omptempty"`
 	Name        string        `xmlrpc:"name,omptempty"`
 }
 
@@ -42,6 +44,7 @@ type PartnerVM struct {
 	Mobile                string        `xmlrpc:"mobile,omptempty"`
 	Name                  string        `xmlrpc:"name,omptempty"`
 	PackageList           []interface{} `xmlrpc:"package_id,omptempty"`
+	PackageListID         []int64       `xmlrpc:"package)list_id,omptempty"`
 }
 
 // GuideVM ...

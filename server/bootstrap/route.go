@@ -48,9 +48,34 @@ func (boot *Bootup) RegisterRoutes() {
 		r.Route("/api", func(r chi.Router) {
 			userHandler := api.UserHandler{Handler: handlerType}
 			r.Route("/user", func(r chi.Router) {
+				r.Get("/login/{id}", userHandler.LoginHandler)
 				r.Group(func(r chi.Router) {
-					r.Use(mJwt.VerifyJwtTokenCredential)
+					r.Use(mJwt.VerifyUserTokenCredential)
 					r.Get("/token", userHandler.GetByTokenHandler)
+					r.Get("/travelPackage", userHandler.GetTravelPackageHandler)
+					r.Get("/jamaah/travelPackage/{id}", userHandler.GetJamaahHandler)
+				})
+			})
+
+			roomHandler := api.RoomHandler{Handler: handlerType}
+			r.Route("/room", func(r chi.Router) {
+				r.Group(func(r chi.Router) {
+					r.Use(mJwt.VerifyUserTokenCredential)
+					r.Get("/", roomHandler.FindAllByParticipantHandler)
+					r.Get("/id/{id}", roomHandler.FindByIDHandler)
+					r.Post("/", roomHandler.CreateHandler)
+					r.Put("/id/{id}", roomHandler.UpdateHandler)
+					r.Delete("/id/{id}", roomHandler.DeleteHandler)
+				})
+			})
+
+			participantHandler := api.ParticipantHandler{Handler: handlerType}
+			r.Route("/participant", func(r chi.Router) {
+				r.Group(func(r chi.Router) {
+					r.Use(mJwt.VerifyUserTokenCredential)
+					r.Post("/add", participantHandler.AddParticipantHandler)
+					r.Post("/remove", participantHandler.RemoveParticipantHandler)
+					r.Put("/leave/room/{id}", participantHandler.LeaveParticipantHandler)
 				})
 			})
 
@@ -62,25 +87,6 @@ func (boot *Bootup) RegisterRoutes() {
 					r.Get("/travelPackage/{id}", odooHandler.FindByIDTravelPackageHandler)
 					r.Get("/partner/{id}", odooHandler.FindByIDPartnerHandler)
 					r.Get("/guide/{id}", odooHandler.FindByIDGuideHandler)
-				})
-			})
-		})
-
-		// API ADMIN
-		r.Route("/api-admin", func(r chi.Router) {
-			adminHandler := api.AdminHandler{Handler: handlerType}
-			r.Route("/admin", func(r chi.Router) {
-				r.Group(func(r chi.Router) {
-					r.Post("/login", adminHandler.LoginHandler)
-				})
-				r.Group(func(r chi.Router) {
-					r.Use(mJwt.VerifySuperadminTokenCredential)
-					r.Get("/", adminHandler.GetAllHandler)
-					r.Get("/id/{id}", adminHandler.GetByIDHandler)
-					r.Get("/code/{code}", adminHandler.GetByCodeHandler)
-					r.Post("/", adminHandler.CreateHandler)
-					r.Put("/id/{id}", adminHandler.UpdateHandler)
-					r.Delete("/id/{id}", adminHandler.DeleteHandler)
 				})
 			})
 		})
