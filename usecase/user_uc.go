@@ -24,19 +24,22 @@ func (uc UserUC) FindByID(id string) (res viewmodel.UserVM, err error) {
 		return res, err
 	}
 
+	s3Uc := S3UC{ContractUC: uc.ContractUC}
 	res = viewmodel.UserVM{
-		ID:         data.ID,
-		Username:   data.Username.String,
-		Email:      data.Email.String,
-		Name:       data.Name.String,
-		Password:   data.Password.String,
-		RoleID:     data.RoleID.String,
-		RoleName:   data.RoleName.String,
-		OdooUserID: data.OdoUserID.Int64,
-		IsActive:   data.IsActive.Bool,
-		CreatedAt:  data.CreatedAt.String,
-		UpdatedAt:  data.UpdatedAt.String,
-		DeletedAt:  data.DeletedAt.String,
+		ID:                data.ID,
+		Username:          data.Username.String,
+		Email:             data.Email.String,
+		Name:              data.Name.String,
+		Password:          data.Password.String,
+		RoleID:            data.RoleID.String,
+		RoleName:          data.RoleName.String,
+		OdooUserID:        data.OdoUserID.Int64,
+		ProfilePicture:    data.ProfilePicture.String,
+		ProfilePictureURL: s3Uc.GetURLNoErr(data.ProfilePicturePath.String),
+		IsActive:          data.IsActive.Bool,
+		CreatedAt:         data.CreatedAt.String,
+		UpdatedAt:         data.UpdatedAt.String,
+		DeletedAt:         data.DeletedAt.String,
 	}
 
 	return res, err
@@ -53,19 +56,22 @@ func (uc UserUC) FindByOdooUserID(odooUserID int64) (res viewmodel.UserVM, err e
 		return res, err
 	}
 
+	s3Uc := S3UC{ContractUC: uc.ContractUC}
 	res = viewmodel.UserVM{
-		ID:         data.ID,
-		Username:   data.Username.String,
-		Email:      data.Email.String,
-		Name:       data.Name.String,
-		Password:   data.Password.String,
-		RoleID:     data.RoleID.String,
-		RoleName:   data.RoleName.String,
-		OdooUserID: data.OdoUserID.Int64,
-		IsActive:   data.IsActive.Bool,
-		CreatedAt:  data.CreatedAt.String,
-		UpdatedAt:  data.UpdatedAt.String,
-		DeletedAt:  data.DeletedAt.String,
+		ID:                data.ID,
+		Username:          data.Username.String,
+		Email:             data.Email.String,
+		Name:              data.Name.String,
+		Password:          data.Password.String,
+		RoleID:            data.RoleID.String,
+		RoleName:          data.RoleName.String,
+		OdooUserID:        data.OdoUserID.Int64,
+		ProfilePicture:    data.ProfilePicture.String,
+		ProfilePictureURL: s3Uc.GetURLNoErr(data.ProfilePicturePath.String),
+		IsActive:          data.IsActive.Bool,
+		CreatedAt:         data.CreatedAt.String,
+		UpdatedAt:         data.UpdatedAt.String,
+		DeletedAt:         data.DeletedAt.String,
 	}
 
 	return res, err

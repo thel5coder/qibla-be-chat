@@ -57,6 +57,14 @@ func (boot *Bootup) RegisterRoutes() {
 				})
 			})
 
+			fileHandler := api.FileHandler{Handler: handlerType}
+			r.Route("/file", func(r chi.Router) {
+				r.Group(func(r chi.Router) {
+					r.Use(mJwt.VerifyUserTokenCredential)
+					r.Post("/", fileHandler.UploadHandler)
+				})
+			})
+
 			roomHandler := api.RoomHandler{Handler: handlerType}
 			r.Route("/room", func(r chi.Router) {
 				r.Group(func(r chi.Router) {

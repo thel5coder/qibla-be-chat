@@ -3,6 +3,7 @@ module qibla-backend-chat
 go 1.13
 
 require (
+	github.com/aws/aws-sdk-go v1.34.0
 	github.com/certifi/gocertifi v0.0.0-20200211180108-c7c1fbc02894 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/evalphobia/logrus_sentry v0.8.2
@@ -26,6 +27,7 @@ require (
 	github.com/pusher/pusher-http-go v4.0.1+incompatible
 	github.com/rs/cors v1.7.0
 	github.com/rs/xid v1.2.1
+	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.5.0
 	github.com/skilld-labs/go-odoo v1.5.0
 	github.com/spf13/viper v1.7.0

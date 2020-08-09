@@ -21,6 +21,8 @@ var (
 type IRoom interface {
 	FindAllByParticipant(participantID, message, lastID string, limit int) ([]RoomEntity, error)
 	FindByID(id string) (RoomEntity, error)
+	FindByIDParticipant(id, participantID string) (RoomEntity, error)
+	FindByProfilePicture(userID, profilePicture string) (RoomEntity, error)
 	FindPrivateByUser(userID, userParticipantID string) (RoomEntity, error)
 	Store(body *RoomEntity) (string, error)
 	Update(body *RoomEntity) (string, error)
@@ -141,6 +143,95 @@ func (model roomModel) FindByID(id string) (res RoomEntity, err error) {
 		{
 			"$and", []interface{}{
 				bson.D{{"_id", id}},
+				bson.D{{
+					"$or", []interface{}{
+						bson.D{{"deleted_at", nil}},
+						bson.D{{"deleted_at", ""}},
+					}},
+				}},
+		},
+	}, findOptions).Decode(&res)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// FindByIDParticipant ...
+func (model roomModel) FindByIDParticipant(id, participantID string) (res RoomEntity, err error) {
+	collection := model.DB.Database(model.DBName).Collection("rooms")
+
+	// Match interface
+	match := []interface{}{
+		bson.D{{"_id", id}},
+		bson.D{{"participant.user_id", participantID}},
+		bson.D{
+			{"$or", []interface{}{
+				bson.D{{"participant.deleted_at", nil}},
+				bson.D{{"participant.deleted_at", ""}},
+			}},
+		},
+		bson.D{
+			{"$or", []interface{}{
+				bson.D{{"deleted_at", nil}},
+				bson.D{{"deleted_at", ""}},
+			}},
+		},
+	}
+
+	query := []bson.M{
+		{
+			"$lookup": bson.M{
+				"from":         "participants",
+				"localField":   "_id",
+				"foreignField": "room_id",
+				"as":           "participant",
+			},
+		},
+		{"$unwind": "$participant"},
+		{
+			"$match": bson.D{
+				{
+					"$and", match,
+				},
+			},
+		},
+		{
+			"$sort": bson.M{"updated_at": -1},
+		},
+		{
+			"$limit": 1,
+		},
+	}
+
+	data, err := collection.Aggregate(context.TODO(), query)
+	if err != nil {
+		return res, err
+	}
+
+	defer data.Close(context.TODO())
+	for data.Next(context.TODO()) {
+		data.Decode(&res)
+	}
+	if err := data.Err(); err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// FindByProfilePicture ...
+func (model roomModel) FindByProfilePicture(userID, profilePicture string) (res RoomEntity, err error) {
+	collection := model.DB.Database(model.DBName).Collection("rooms")
+
+	findOptions := options.FindOne()
+	findOptions.SetSort(bson.D{{"created_at", 1}})
+	err = collection.FindOne(context.TODO(), bson.D{
+		{
+			"$and", []interface{}{
+				bson.D{{"user_id", userID}},
+				bson.D{{"profile_picture", profilePicture}},
 				bson.D{{
 					"$or", []interface{}{
 						bson.D{{"deleted_at", nil}},

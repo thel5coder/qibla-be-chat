@@ -6,6 +6,7 @@ type RoomVM struct {
 	Type              string          `json:"type"`
 	Name              string          `json:"name"`
 	ProfilePicture    string          `json:"profile_picture"`
+	ProfilePictureURL string          `json:"profile_picture_url"`
 	Description       string          `json:"description"`
 	UserID            string          `json:"user_id"`
 	UserParticipantID string          `json:"user_participant_id"`

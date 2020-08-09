@@ -14,6 +14,7 @@ import (
 	"qibla-backend-chat/pkg/odoo"
 	"qibla-backend-chat/pkg/pg"
 	"qibla-backend-chat/pkg/pusher"
+	"qibla-backend-chat/pkg/s3"
 	"qibla-backend-chat/pkg/str"
 	boot "qibla-backend-chat/server/bootstrap"
 	"qibla-backend-chat/usecase"
@@ -160,6 +161,15 @@ func main() {
 	defer cancel()
 	defer mongoDB.Disconnect(ctxMongo)
 
+	// S3 credential
+	s3Credential := s3.Credential{
+		URL:       envConfig["S3_URL"],
+		AccessKey: envConfig["S3_ACCESS_KEY"],
+		SecretKey: envConfig["S3_SECRET_KEY"],
+		Bucket:    envConfig["S3_BUCKET"],
+		Region:    envConfig["S3_REGION"],
+	}
+
 	// Validator initialize
 	validatorInit()
 
@@ -177,6 +187,7 @@ func main() {
 		Mandrill:    mandrillCredential,
 		Odoo:        odooDB,
 		Pusher:      pusherCredential,
+		S3:          s3Credential,
 	}
 
 	r := chi.NewRouter()

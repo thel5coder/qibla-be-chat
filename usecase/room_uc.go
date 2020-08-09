@@ -32,6 +32,7 @@ func (uc RoomUC) FindAllByParticipant(participantID, message, lastID string, lim
 
 	chatUc := ChatUC{ContractUC: uc.ContractUC}
 	participantUc := ParticipantUC{ContractUC: uc.ContractUC}
+	s3Uc := S3UC{ContractUC: uc.ContractUC}
 	for _, r := range data {
 		// Set name for private chat
 		if r.Type == mongomodel.RoomTypePrivate {
@@ -62,6 +63,7 @@ func (uc RoomUC) FindAllByParticipant(participantID, message, lastID string, lim
 			Type:              r.Type,
 			Name:              r.Name,
 			ProfilePicture:    r.ProfilePicture,
+			ProfilePictureURL: s3Uc.GetURLNoErr(r.ProfilePicture),
 			Description:       r.Description,
 			UserID:            r.UserID,
 			UserParticipantID: r.UserParticipantID,
@@ -76,17 +78,8 @@ func (uc RoomUC) FindAllByParticipant(participantID, message, lastID string, lim
 	return res, err
 }
 
-// FindByID ...
-func (uc RoomUC) FindByID(id, userID string) (res viewmodel.RoomVM, err error) {
-	ctx := "RoomUC.FindByID"
-
-	roomModel := mongomodel.NewRoomModel(uc.MongoDB, uc.MongoDBName)
-	data, err := roomModel.FindByID(id)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "find", uc.ReqID)
-		return res, err
-	}
-
+// BuildBody ...
+func (uc RoomUC) BuildBody(userID string, data *mongomodel.RoomEntity, res *viewmodel.RoomVM) {
 	// Set name for private chat
 	if data.Type == mongomodel.RoomTypePrivate {
 		nameArr := strings.Split(data.Name, ";")
@@ -111,21 +104,71 @@ func (uc RoomUC) FindByID(id, userID string) (res viewmodel.RoomVM, err error) {
 		status = false
 	}
 
-	res = viewmodel.RoomVM{
-		ID:                data.ID,
-		Type:              data.Type,
-		Name:              data.Name,
-		ProfilePicture:    data.ProfilePicture,
-		Description:       data.Description,
-		UserID:            data.UserID,
-		UserParticipantID: data.UserParticipantID,
-		LastChat:          lastChat,
-		Participants:      participant,
-		Status:            status,
-		CreatedAt:         data.CreatedAt,
-		UpdatedAt:         data.UpdatedAt,
-		DeletedAt:         data.DeletedAt,
+	s3Uc := S3UC{ContractUC: uc.ContractUC}
+	res.ID = data.ID
+	res.Type = data.Type
+	res.Name = data.Name
+	res.ProfilePicture = data.ProfilePicture
+	res.ProfilePictureURL = s3Uc.GetURLNoErr(data.ProfilePicture)
+	res.Description = data.Description
+	res.UserID = data.UserID
+	res.UserParticipantID = data.UserParticipantID
+	res.LastChat = lastChat
+	res.Participants = participant
+	res.Status = status
+	res.CreatedAt = data.CreatedAt
+	res.UpdatedAt = data.UpdatedAt
+	res.DeletedAt = data.DeletedAt
+}
+
+// FindByID ...
+func (uc RoomUC) FindByID(id, userID string) (res viewmodel.RoomVM, err error) {
+	ctx := "RoomUC.FindByID"
+
+	roomModel := mongomodel.NewRoomModel(uc.MongoDB, uc.MongoDBName)
+	data, err := roomModel.FindByID(id)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "find", uc.ReqID)
+		return res, err
 	}
+
+	uc.BuildBody(userID, &data, &res)
+
+	return res, err
+}
+
+// FindByIDParticipant ...
+func (uc RoomUC) FindByIDParticipant(id, userID string) (res viewmodel.RoomVM, err error) {
+	ctx := "RoomUC.FindByIDParticipant"
+
+	roomModel := mongomodel.NewRoomModel(uc.MongoDB, uc.MongoDBName)
+	data, err := roomModel.FindByIDParticipant(id, userID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "find", uc.ReqID)
+		return res, err
+	}
+	if data.ID == "" {
+		logruslogger.Log(logruslogger.WarnLevel, "", ctx, "empty", uc.ReqID)
+		return res, errors.New(helper.RecordNotExist)
+	}
+
+	uc.BuildBody(userID, &data, &res)
+
+	return res, err
+}
+
+// FindByProfilePicture ...
+func (uc RoomUC) FindByProfilePicture(userID, profilePicture string) (res viewmodel.RoomVM, err error) {
+	ctx := "RoomUC.FindByProfilePicture"
+
+	roomModel := mongomodel.NewRoomModel(uc.MongoDB, uc.MongoDBName)
+	data, err := roomModel.FindByProfilePicture(userID, profilePicture)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "find", uc.ReqID)
+		return res, err
+	}
+
+	uc.BuildBody(userID, &data, &res)
 
 	return res, err
 }
@@ -286,7 +329,7 @@ func (uc RoomUC) CheckOddoParticipant(userData *viewmodel.UserVM, participants *
 }
 
 // NewRoom ...
-func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomRequest) (res mongomodel.RoomEntity, err error) {
+func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomRequest) (res viewmodel.RoomVM, err error) {
 	ctx := "RoomUC.NewRoom"
 
 	// Check  valid participant and add self id if not exist in participant
@@ -324,7 +367,7 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 
 	// Add room
 	now := time.Now().UTC()
-	res = mongomodel.RoomEntity{
+	roomBody := mongomodel.RoomEntity{
 		Type:              data.Type,
 		Name:              data.Name,
 		ProfilePicture:    data.ProfilePicture,
@@ -334,7 +377,7 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 		CreatedAt:         now.Format(time.RFC3339),
 		UpdatedAt:         now.Format(time.RFC3339),
 	}
-	err = uc.Create(&res)
+	err = uc.Create(&roomBody)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "add_room", uc.ReqID)
 		return res, err
@@ -349,13 +392,28 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 		}
 
 		participantBody := mongomodel.ParticipantEntity{
-			RoomID:    res.ID,
+			RoomID:    roomBody.ID,
 			UserID:    p.UserID,
 			Type:      types,
 			CreatedAt: now.Format(time.RFC3339),
 			UpdatedAt: now.Format(time.RFC3339),
 		}
 		participantUc.Create(&participantBody)
+	}
+
+	// Build response struct
+	s3Uc := S3UC{ContractUC: uc.ContractUC}
+	res = viewmodel.RoomVM{
+		ID:                roomBody.ID,
+		Type:              roomBody.Type,
+		Name:              roomBody.Name,
+		ProfilePicture:    roomBody.ProfilePicture,
+		ProfilePictureURL: s3Uc.GetURLNoErr(roomBody.ProfilePicture),
+		Description:       roomBody.Description,
+		UserParticipantID: roomBody.UserParticipantID,
+		UserID:            userData.ID,
+		CreatedAt:         roomBody.CreatedAt,
+		UpdatedAt:         roomBody.UpdatedAt,
 	}
 
 	// Trigger pusher
@@ -366,11 +424,11 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 }
 
 // UpdateRoom ...
-func (uc RoomUC) UpdateRoom(id, userID string, body *request.UpdateRoomRequest) (res mongomodel.RoomEntity, err error) {
+func (uc RoomUC) UpdateRoom(id, userID string, body *request.UpdateRoomRequest) (res viewmodel.RoomVM, err error) {
 	ctx := "RoomUC.UpdateRoom"
 
 	now := time.Now().UTC()
-	res = mongomodel.RoomEntity{
+	roomBody := mongomodel.RoomEntity{
 		ID:             id,
 		Name:           body.Name,
 		ProfilePicture: body.ProfilePicture,
@@ -379,10 +437,23 @@ func (uc RoomUC) UpdateRoom(id, userID string, body *request.UpdateRoomRequest) 
 		CreatedAt:      now.Format(time.RFC3339),
 		UpdatedAt:      now.Format(time.RFC3339),
 	}
-	err = uc.Update(&res)
+	err = uc.Update(&roomBody)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "update", uc.ReqID)
 		return res, err
+	}
+
+	// Build response struct
+	s3Uc := S3UC{ContractUC: uc.ContractUC}
+	res = viewmodel.RoomVM{
+		ID:                roomBody.ID,
+		Name:              roomBody.Name,
+		ProfilePicture:    roomBody.ProfilePicture,
+		ProfilePictureURL: s3Uc.GetURLNoErr(roomBody.ProfilePicture),
+		Description:       roomBody.Description,
+		UserID:            userID,
+		CreatedAt:         roomBody.CreatedAt,
+		UpdatedAt:         roomBody.UpdatedAt,
 	}
 
 	// Trigger pusher

@@ -53,7 +53,7 @@ func (h *RoomHandler) FindByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	roomUc := usecase.RoomUC{ContractUC: h.ContractUC}
-	res, err := roomUc.FindByID(id, user.ID)
+	res, err := roomUc.FindByIDParticipant(id, user.ID)
 	if err != nil {
 		SendBadRequest(w, err.Error())
 		return

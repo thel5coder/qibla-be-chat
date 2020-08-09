@@ -3,6 +3,7 @@ package usecase
 import (
 	"encoding/json"
 	"errors"
+	"qibla-backend-chat/pkg/s3"
 	"time"
 
 	"database/sql"
@@ -64,6 +65,7 @@ type ContractUC struct {
 	ReqID       string
 	Odoo        *odoo.Client
 	Pusher      pusher.Credential
+	S3          s3.Credential
 }
 
 // StoreToRedis save data to redis with key key
