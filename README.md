@@ -1,4 +1,4 @@
-# Qibla Chat Backend 1.0.0
+# Qibla Chat Backend
 ### Version 1.0.0
 ### By Ivan Satyaputra
 
@@ -38,6 +38,7 @@ usecase = API logic flow
 
 NOTE: You must create .env file based on .env.example file that provided
 
+```
 APP_DEBUG=false : true/false, flag to debug app if panic happen  
 APP_HOST=0.0.0.0:3000 : default port that app will running  
 APP_LOCALE=en : default validator v9 default language  
@@ -88,6 +89,7 @@ S3_ACCESS_KEY= : s3 access key
 S3_SECRET_KEY= : s3 secret key  
 S3_BUCKET= : s3 bucket name  
 S3_REGION= : s3 region  
+```
 
 ## Deploy using Docker
 
@@ -115,7 +117,7 @@ chmod 0744 /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
-### Run command below and your app will run on port 3000
+### Run docker on port 3000
 ```bash
 bash docker_build.sh
 ```
