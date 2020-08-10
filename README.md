@@ -6,12 +6,12 @@
 [working Go 1.12+ installation](http://golang.org/doc/install).
 
 ### Main package
-```
-$ git clone https://repo.nusatek.id/qibla/backend/api/qibla-backend-chat.git
-$ go mod download
-$ go mod vendor
-$ cd server
-$ go run main.go
+```bash
+git clone https://repo.nusatek.id/qibla/backend/api/qibla-backend-chat.git
+go mod download
+go mod vendor
+cd server
+go run main.go
 ```
 
 ### Repository structure
@@ -102,6 +102,25 @@ systemctl start docker
 systemctl enable docker
 ```
 
+- How to install Docker in Ubuntu 18.04
+```bash
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+
 ### Docker compose
 - How to install `docker-compose` in CentOS 8
 ```bash
@@ -109,6 +128,13 @@ dnf install curl
 curl -L https://github.com/docker/compose/releases/download/1.26.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 chmod 0744 /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+```
+
+- How to install `docker-compose` in Ubuntu 18.04
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
 ```
 
 ### Run docker on port 3000
