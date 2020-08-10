@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	uuid "github.com/satori/go.uuid"
 	"mime/multipart"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -40,7 +41,7 @@ func (cred *Credential) Upload(path string, file *multipart.FileHeader) (res str
 	}
 	defer f.Close()
 
-	res = path + "/" + time.Now().Format("20060102T150405") + "_" + uuid.NewV4().String() + strings.Replace(file.Filename, " ", "", -1)
+	res = path + "/" + time.Now().Format("20060102T150405") + "_" + uuid.NewV4().String() + filepath.Ext(strings.ToLower(file.Filename))
 
 	// Upload the file to S3.
 	_, err = uploader.Upload(&s3manager.UploadInput{

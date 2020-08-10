@@ -47,7 +47,7 @@ func (h *FileHandler) UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Upload file to local temporary
 	fileUc := usecase.FileUC{ContractUC: h.ContractUC}
-	res, err := fileUc.Upload(fileType, userID, header)
+	res, err := fileUc.Upload(fileType, userID, header, true)
 	if err != nil {
 		SendBadRequest(w, err.Error())
 		return

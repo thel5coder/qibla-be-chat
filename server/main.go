@@ -3,13 +3,11 @@ package main
 import (
 	"context"
 	"qibla-backend-chat/pkg/aes"
-	"qibla-backend-chat/pkg/aesfront"
 	"qibla-backend-chat/pkg/env"
 	"qibla-backend-chat/pkg/interfacepkg"
 	"qibla-backend-chat/pkg/jwe"
 	"qibla-backend-chat/pkg/jwt"
 	"qibla-backend-chat/pkg/logruslogger"
-	"qibla-backend-chat/pkg/mandrill"
 	"qibla-backend-chat/pkg/mongo"
 	"qibla-backend-chat/pkg/odoo"
 	"qibla-backend-chat/pkg/pg"
@@ -114,19 +112,6 @@ func main() {
 		Key: envConfig["AES_KEY"],
 	}
 
-	// AES Front credential
-	aesFrontCredential := aesfront.Credential{
-		Key: envConfig["AES_FRONT_KEY"],
-		Iv:  envConfig["AES_FRONT_IV"],
-	}
-
-	// Mandrill credential
-	mandrillCredential := mandrill.Credential{
-		Key:      envConfig["MANDRILL_KEY"],
-		FromMail: envConfig["MANDRILL_FROM_MAIL"],
-		FromName: envConfig["MANDRILL_FROM_NAME"],
-	}
-
 	// ODOO connection
 	odooInfo := odoo.Connection{
 		Host: envConfig["ODOO_URL"],
@@ -183,8 +168,6 @@ func main() {
 		Jwt:         jwtCredential,
 		Jwe:         jweCredential,
 		Aes:         aesCredential,
-		AesFront:    aesFrontCredential,
-		Mandrill:    mandrillCredential,
 		Odoo:        odooDB,
 		Pusher:      pusherCredential,
 		S3:          s3Credential,
@@ -226,24 +209,14 @@ func main() {
 	// register routes
 	bootApp.RegisterRoutes()
 
-	// Create static folder for file uploading
+	// Create & register static folder for file uploading
 	filePath := envConfig["FILE_STATIC_FILE"]
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		os.Mkdir(filePath, os.ModePerm)
 	}
-
-	// Register folder for a go static folder
 	workDir, _ := os.Getwd()
 	filesDir := filepath.Join(workDir, filePath)
 	fileServer(r, envConfig["FILE_PATH"], http.Dir(filesDir))
-
-	// Create static folder for html picture
-	filePath = envConfig["HTML_FILE_STATIC_FILE"]
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		os.Mkdir(filePath, os.ModePerm)
-	}
-	filesDir = filepath.Join(workDir, filePath)
-	fileServer(r, envConfig["HTML_FILE_PATH"], http.Dir(filesDir))
 
 	// Log start server
 	startBody := map[string]interface{}{

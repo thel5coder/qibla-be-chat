@@ -38,6 +38,10 @@ func (uc S3UC) GetURL(key string) (res string, err error) {
 
 // GetURLNoErr ...
 func (uc S3UC) GetURLNoErr(key string) (res string) {
+	if key == "" {
+		return res
+	}
+
 	res, _ = uc.GetURL(key)
 
 	return res

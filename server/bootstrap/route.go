@@ -77,6 +77,16 @@ func (boot *Bootup) RegisterRoutes() {
 				})
 			})
 
+			chatHandler := api.ChatHandler{Handler: handlerType}
+			r.Route("/chat", func(r chi.Router) {
+				r.Group(func(r chi.Router) {
+					r.Use(mJwt.VerifyUserTokenCredential)
+					r.Get("/", chatHandler.GetAllByRoomHandler)
+					r.Post("/", chatHandler.CreateHandler)
+					r.Delete("/id/{id}", chatHandler.DeleteHandler)
+				})
+			})
+
 			participantHandler := api.ParticipantHandler{Handler: handlerType}
 			r.Route("/participant", func(r chi.Router) {
 				r.Group(func(r chi.Router) {

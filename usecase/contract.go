@@ -8,13 +8,10 @@ import (
 
 	"database/sql"
 	"qibla-backend-chat/pkg/aes"
-	"qibla-backend-chat/pkg/aesfront"
 	"qibla-backend-chat/pkg/jwe"
 	"qibla-backend-chat/pkg/jwt"
 	"qibla-backend-chat/pkg/logruslogger"
-	"qibla-backend-chat/pkg/mandrill"
 	"qibla-backend-chat/pkg/pusher"
-	"qibla-backend-chat/pkg/wavecell"
 	"qibla-backend-chat/usecase/viewmodel"
 
 	"github.com/go-redis/redis/v7"
@@ -48,21 +45,16 @@ var AmqpChannel *amqp.Channel
 
 // ContractUC ...
 type ContractUC struct {
+	ReqID       string
 	DB          *sql.DB
 	Tx          *sql.Tx
 	MongoDB     *mongo.Client
 	MongoDBName string
-	AmqpConn    *amqp.Connection
-	AmqpChannel *amqp.Channel
 	Redis       *redis.Client
 	EnvConfig   map[string]string
 	Jwt         jwt.Credential
 	Jwe         jwe.Credential
 	Aes         aes.Credential
-	AesFront    aesfront.Credential
-	Wavecell    wavecell.Connection
-	Mandrill    mandrill.Credential
-	ReqID       string
 	Odoo        *odoo.Client
 	Pusher      pusher.Credential
 	S3          s3.Credential

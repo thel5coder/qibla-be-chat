@@ -100,14 +100,16 @@ func getUserDetail(r *http.Request) (res viewmodel.UserVM) {
 	user := requestIDFromContextInterface(r.Context(), "user")
 
 	res = viewmodel.UserVM{
-		ID:         user["id"].(string),
-		Username:   user["username"].(string),
-		Email:      user["email"].(string),
-		Name:       user["name"].(string),
-		IsActive:   user["is_active"].(bool),
-		RoleID:     user["role_id"].(string),
-		RoleName:   user["role_name"].(string),
-		OdooUserID: user["odoo_user_id"].(int64),
+		ID:                user["id"].(string),
+		Username:          user["username"].(string),
+		Email:             user["email"].(string),
+		Name:              user["name"].(string),
+		IsActive:          user["is_active"].(bool),
+		ProfilePicture:    user["profile_picture"].(string),
+		ProfilePictureURL: user["profile_picture_url"].(string),
+		RoleID:            user["role_id"].(string),
+		RoleName:          user["role_name"].(string),
+		OdooUserID:        user["odoo_user_id"].(int64),
 	}
 
 	return res

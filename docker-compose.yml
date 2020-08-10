@@ -6,7 +6,7 @@ services:
   restart: always
   hostname: qibla-backend-chat
   ports:
-      - "8910:3000"
+      - "3000:3000"
   volumes:
    - ./static:/go/src/qibla-backend-chat/static
 networks:

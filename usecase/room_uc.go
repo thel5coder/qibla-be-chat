@@ -23,6 +23,8 @@ type RoomUC struct {
 func (uc RoomUC) FindAllByParticipant(participantID, message, lastID string, limit int) (res []viewmodel.RoomVM, err error) {
 	ctx := "RoomUC.FindAllByParticipant"
 
+	limit = uc.LimitMax(limit)
+
 	roomModel := mongomodel.NewRoomModel(uc.MongoDB, uc.MongoDBName)
 	data, err := roomModel.FindAllByParticipant(participantID, message, lastID, limit)
 	if err != nil {

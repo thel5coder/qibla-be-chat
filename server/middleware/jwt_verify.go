@@ -90,6 +90,8 @@ func (m VerifyMiddlewareInit) VerifyUserTokenCredential(next http.Handler) http.
 		jweRes["is_active"] = user.IsActive
 		jweRes["role_id"] = user.RoleID
 		jweRes["role_name"] = user.RoleName
+		jweRes["profile_picture"] = user.ProfilePicture
+		jweRes["profile_picture_url"] = user.ProfilePictureURL
 		jweRes["odoo_user_id"] = user.OdooUserID
 
 		ctx := userContextInterface(r.Context(), r, "user", jweRes)

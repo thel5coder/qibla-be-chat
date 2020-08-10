@@ -26,6 +26,7 @@ const (
 // IChat ...
 type IChat interface {
 	FindAllByRoom(roomID, message, lastID string, limit int) ([]ChatEntity, error)
+	FindByID(id string) (ChatEntity, error)
 	FindLast(roomID string) (ChatEntity, error)
 	Store(body *ChatEntity) (string, error)
 	Delete(id string) (string, error)
@@ -100,6 +101,28 @@ func (model chatModel) FindAllByRoom(roomID, message, lastID string, limit int) 
 	if err := data.Err(); err != nil {
 		return res, err
 	}
+
+	return res, err
+}
+
+// FindByID ...
+func (model chatModel) FindByID(id string) (res ChatEntity, err error) {
+	collection := model.DB.Database(model.DBName).Collection("chats")
+
+	findOptions := options.FindOne()
+	findOptions.SetSort(bson.D{{"created_at", 1}})
+	err = collection.FindOne(context.TODO(), bson.D{
+		{
+			"$and", []interface{}{
+				bson.D{{"_id", id}},
+				bson.D{
+					{"$or", []interface{}{
+						bson.D{{"deleted_at", nil}},
+						bson.D{{"deleted_at", ""}},
+					}},
+				},
+			},
+		}}, findOptions).Decode(&res)
 
 	return res, err
 }

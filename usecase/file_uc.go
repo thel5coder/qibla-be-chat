@@ -111,16 +111,18 @@ func (uc FileUC) FindOneAssigned(id, types string) (res viewmodel.FileVM, err er
 }
 
 // Create ...
-func (uc FileUC) Create(types, url, userUpload string) (res viewmodel.FileVM, err error) {
+func (uc FileUC) Create(types, url, userUpload string, deleteUnusedFile bool) (res viewmodel.FileVM, err error) {
 	ctx := "FileUC.Create"
 
 	fileModel := model.NewFileModel(uc.DB)
 
 	// Delete all unused files first
-	err = uc.DeleteAllUnused(userUpload, types)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "delete_unused", uc.ReqID)
-		return res, err
+	if deleteUnusedFile {
+		err = uc.DeleteAllUnused(userUpload, types)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "delete_unused", uc.ReqID)
+			return res, err
+		}
 	}
 
 	now := time.Now().UTC()
@@ -199,19 +201,19 @@ func (uc FileUC) DeleteAllUnused(userID, types string) (err error) {
 }
 
 // Upload ...
-func (uc FileUC) Upload(types, userID string, file *multipart.FileHeader) (res viewmodel.FileVM, err error) {
+func (uc FileUC) Upload(types, userID string, file *multipart.FileHeader, deleteUnusedFile bool) (res viewmodel.FileVM, err error) {
 	ctx := "FileUC.Upload"
 
 	s3Uc := S3UC{ContractUC: uc.ContractUC}
 	fileKey, err := s3Uc.UploadFile(types+"/"+userID, file)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, "", ctx, "upload_file", uc.ReqID)
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "upload_file", uc.ReqID)
 		return res, err
 	}
 
-	res, err = uc.Create(types, fileKey, userID)
+	res, err = uc.Create(types, fileKey, userID, deleteUnusedFile)
 	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, "", ctx, "create", uc.ReqID)
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "create", uc.ReqID)
 		return res, err
 	}
 

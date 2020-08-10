@@ -33,19 +33,21 @@ func (uc ParticipantUC) SelectAllByRoom(roomID string) (res []viewmodel.Particip
 		user, _ := userUc.FindByID(r.UserID)
 
 		res = append(res, viewmodel.ParticipantVM{
-			ID:         r.ID,
-			RoomID:     r.Type,
-			UserID:     r.UserID,
-			Username:   user.Username,
-			Email:      user.Email,
-			Name:       user.Name,
-			RoleID:     user.RoleID,
-			RoleName:   user.RoleName,
-			OdooUserID: user.OdooUserID,
-			Type:       r.Type,
-			CreatedAt:  r.CreatedAt,
-			UpdatedAt:  r.UpdatedAt,
-			DeletedAt:  r.DeletedAt,
+			ID:                r.ID,
+			RoomID:            r.Type,
+			UserID:            r.UserID,
+			Username:          user.Username,
+			Email:             user.Email,
+			Name:              user.Name,
+			RoleID:            user.RoleID,
+			RoleName:          user.RoleName,
+			OdooUserID:        user.OdooUserID,
+			ProfilePicture:    user.ProfilePicture,
+			ProfilePictureURL: user.ProfilePictureURL,
+			Type:              r.Type,
+			CreatedAt:         r.CreatedAt,
+			UpdatedAt:         r.UpdatedAt,
+			DeletedAt:         r.DeletedAt,
 		})
 	}
 
@@ -69,19 +71,21 @@ func (uc ParticipantUC) FindAllByRoom(roomID, lastID string, limit int) (res []v
 		user, _ := userUc.FindByID(r.UserID)
 
 		res = append(res, viewmodel.ParticipantVM{
-			ID:         r.ID,
-			RoomID:     r.Type,
-			UserID:     r.UserID,
-			Username:   user.Username,
-			Email:      user.Email,
-			Name:       user.Name,
-			RoleID:     user.RoleID,
-			RoleName:   user.RoleName,
-			OdooUserID: user.OdooUserID,
-			Type:       r.Type,
-			CreatedAt:  r.CreatedAt,
-			UpdatedAt:  r.UpdatedAt,
-			DeletedAt:  r.DeletedAt,
+			ID:                r.ID,
+			RoomID:            r.Type,
+			UserID:            r.UserID,
+			Username:          user.Username,
+			Email:             user.Email,
+			Name:              user.Name,
+			RoleID:            user.RoleID,
+			RoleName:          user.RoleName,
+			OdooUserID:        user.OdooUserID,
+			ProfilePicture:    user.ProfilePicture,
+			ProfilePictureURL: user.ProfilePictureURL,
+			Type:              r.Type,
+			CreatedAt:         r.CreatedAt,
+			UpdatedAt:         r.UpdatedAt,
+			DeletedAt:         r.DeletedAt,
 		})
 	}
 
@@ -104,19 +108,21 @@ func (uc ParticipantUC) FindByRoomParticipant(roomID, userID string) (res viewmo
 	user, _ := userUc.FindByID(data.UserID)
 
 	res = viewmodel.ParticipantVM{
-		ID:         data.ID,
-		RoomID:     data.Type,
-		UserID:     data.UserID,
-		Username:   user.Username,
-		Email:      user.Email,
-		Name:       user.Name,
-		RoleID:     user.RoleID,
-		RoleName:   user.RoleName,
-		OdooUserID: user.OdooUserID,
-		Type:       data.Type,
-		CreatedAt:  data.CreatedAt,
-		UpdatedAt:  data.UpdatedAt,
-		DeletedAt:  data.DeletedAt,
+		ID:                data.ID,
+		RoomID:            data.Type,
+		UserID:            data.UserID,
+		Username:          user.Username,
+		Email:             user.Email,
+		Name:              user.Name,
+		RoleID:            user.RoleID,
+		RoleName:          user.RoleName,
+		OdooUserID:        user.OdooUserID,
+		ProfilePicture:    user.ProfilePicture,
+		ProfilePictureURL: user.ProfilePictureURL,
+		Type:              data.Type,
+		CreatedAt:         data.CreatedAt,
+		UpdatedAt:         data.UpdatedAt,
+		DeletedAt:         data.DeletedAt,
 	}
 
 	return res, err
@@ -232,18 +238,20 @@ func (uc ParticipantUC) NewParticipant(userData *viewmodel.UserVM, participant *
 	}
 
 	res = viewmodel.ParticipantVM{
-		ID:         participantBody.ID,
-		RoomID:     participantBody.RoomID,
-		UserID:     participantBody.UserID,
-		Username:   user.Username,
-		Email:      user.Email,
-		Name:       user.Name,
-		RoleID:     user.RoleID,
-		RoleName:   user.RoleName,
-		OdooUserID: user.OdooUserID,
-		Type:       participantBody.Type,
-		CreatedAt:  now.Format(time.RFC3339),
-		UpdatedAt:  now.Format(time.RFC3339),
+		ID:                participantBody.ID,
+		RoomID:            participantBody.RoomID,
+		UserID:            participantBody.UserID,
+		Username:          user.Username,
+		Email:             user.Email,
+		Name:              user.Name,
+		RoleID:            user.RoleID,
+		RoleName:          user.RoleName,
+		OdooUserID:        user.OdooUserID,
+		ProfilePicture:    user.ProfilePicture,
+		ProfilePictureURL: user.ProfilePictureURL,
+		Type:              participantBody.Type,
+		CreatedAt:         now.Format(time.RFC3339),
+		UpdatedAt:         now.Format(time.RFC3339),
 	}
 
 	// Trigger pusher

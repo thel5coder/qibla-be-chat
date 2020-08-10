@@ -201,4 +201,6 @@ var (
 	AlreadyInRoom = "already_in_room"
 	// InvalidUser ...
 	InvalidUser = "invalid_user"
+	// InvalidRoom ...
+	InvalidRoom = "invalid_room"
 )
