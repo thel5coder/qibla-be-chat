@@ -2,7 +2,6 @@
 ### By Ivan Satyaputra, Version 1.0.0
 
 ## Building
-
 ### Building requires a
 [working Go 1.12+ installation](http://golang.org/doc/install).
 
@@ -34,7 +33,6 @@ usecase = API logic flow
 ```
 
 ## Dependencies
-
 NOTE: You must create .env file based on .env.example file that provided
 
 ```
@@ -91,9 +89,7 @@ S3_REGION= : s3 region
 ```
 
 ## Deploy using Docker
-
 NOTE: You must install docker and docker-compose first in your instance
-
 ### Docker
 - How to install Docker in CentOS 8
 
@@ -108,7 +104,6 @@ systemctl enable docker
 
 ### Docker compose
 - How to install `docker-compose` in CentOS 8
-
 ```bash
 dnf install curl
 curl -L https://github.com/docker/compose/releases/download/1.26.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
