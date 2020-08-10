@@ -1,6 +1,5 @@
 # Qibla Chat Backend
-### Version 1.0.0
-### By Ivan Satyaputra
+### Version 1.0.0, By Ivan Satyaputra
 
 ## Building
 
