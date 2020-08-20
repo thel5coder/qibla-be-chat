@@ -186,17 +186,7 @@ func (uc RoomUC) FindPrivateByUser(userID, userParticipantID string) (res viewmo
 		return res, err
 	}
 
-	res = viewmodel.RoomVM{
-		ID:                data.ID,
-		Type:              data.Type,
-		ProfilePicture:    data.ProfilePicture,
-		Description:       data.Description,
-		UserID:            data.UserID,
-		UserParticipantID: data.UserParticipantID,
-		CreatedAt:         data.CreatedAt,
-		UpdatedAt:         data.UpdatedAt,
-		DeletedAt:         data.DeletedAt,
-	}
+	uc.BuildBody(userID, &data, &res)
 
 	return res, err
 }
@@ -354,7 +344,7 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 	// If type is private check room exist or not
 	if data.Type == mongomodel.RoomTypePrivate {
 		existRoom, _ := uc.FindPrivateByUser(userData.ID, data.UserParticipantID)
-		if existRoom.ID != "" {
+		if existRoom.ID != "" && existRoom.Status {
 			logruslogger.Log(logruslogger.WarnLevel, interfacepkg.Marshall(existRoom), ctx, "room_exist", uc.ReqID)
 			return res, errors.New(helper.RoomExist)
 		}
