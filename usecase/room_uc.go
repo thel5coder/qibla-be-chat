@@ -344,9 +344,20 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 	// If type is private check room exist or not
 	if data.Type == mongomodel.RoomTypePrivate {
 		existRoom, _ := uc.FindPrivateByUser(userData.ID, data.UserParticipantID)
-		if existRoom.ID != "" && existRoom.Status {
-			logruslogger.Log(logruslogger.WarnLevel, interfacepkg.Marshall(existRoom), ctx, "room_exist", uc.ReqID)
-			return res, errors.New(helper.RoomExist)
+		if existRoom.ID != "" {
+			if existRoom.Status {
+				logruslogger.Log(logruslogger.WarnLevel, interfacepkg.Marshall(existRoom), ctx, "room_exist", uc.ReqID)
+				return res, errors.New(helper.RoomExist)
+			}
+
+			// Add user into existing private room
+			err = uc.UpdatePrivateRoom(userData, &existRoom, data)
+			if err != nil {
+				logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "update_private_number", uc.ReqID)
+				return res, err
+			}
+
+			return existRoom, err
 		}
 	}
 
@@ -413,6 +424,53 @@ func (uc RoomUC) NewRoom(userData *viewmodel.UserVM, data *request.NewRoomReques
 	pusherUc.SendAllParticipant(pusher.EventNewRoomUser, res.ID, userData.ID, res)
 
 	return res, err
+}
+
+// UpdatePrivateRoom ...
+func (uc RoomUC) UpdatePrivateRoom(userData *viewmodel.UserVM, existRoom *viewmodel.RoomVM, data *request.NewRoomRequest) (err error) {
+	ctx := "RoomUC.UpdatePrivateRoom"
+
+	// Check validity participant from odoo
+	err = uc.CheckOddoParticipant(userData, &data.Participants)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), ctx, "check_odoo_participant", uc.ReqID)
+		return err
+	}
+
+	// Add participant
+	participantBody := mongomodel.ParticipantEntity{}
+	participantUc := ParticipantUC{ContractUC: uc.ContractUC}
+	for _, p := range data.Participants {
+		addParticipant := true
+		for _, rp := range existRoom.Participants {
+			if rp.UserID == p.UserID {
+				addParticipant = false
+			}
+		}
+
+		if addParticipant {
+			types := mongomodel.ParticipantTypeUser
+			if p.UserID == userData.ID {
+				types = mongomodel.ParticipantTypeAdmin
+			}
+
+			now := time.Now().UTC()
+			participantBody = mongomodel.ParticipantEntity{
+				RoomID:    existRoom.ID,
+				UserID:    p.UserID,
+				Type:      types,
+				CreatedAt: now.Format(time.RFC3339),
+				UpdatedAt: now.Format(time.RFC3339),
+			}
+			participantUc.Create(&participantBody)
+		}
+	}
+
+	// Trigger pusher
+	pusherUc := PusherUC{ContractUC: uc.ContractUC}
+	pusherUc.SendAllParticipant(pusher.EventNewParticipant, existRoom.ID, userData.ID, participantBody)
+
+	return err
 }
 
 // UpdateRoom ...
