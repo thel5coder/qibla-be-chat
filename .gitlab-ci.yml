@@ -1,0 +1,33 @@
+image: docker:git
+services:
+  - docker:dind
+
+stages:
+  - build
+  - push
+  - deploy
+
+after_script:
+  - docker logout $REGISTRY
+
+build:
+  stage: build
+  script:
+    - docker build . --compress -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - dev
+
+push:
+  stage: push
+  script:
+    - docker login -u $USERNAME -p $TOKEN $REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - dev
+
+deploy:
+  stage: deploy
+  script:
+    - ssh -tq $SERVER "docker login -u $USERNAME -p $TOKEN $REGISTRY && docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME; docker-compose -f ${FOLDER}/docker-compose.yml up -d"
+  only:
+    - dev
